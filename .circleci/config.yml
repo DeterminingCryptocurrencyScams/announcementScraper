@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            # Custom Build before implementing tag/branch system
+            echo "Build official Docker image"
+            cp ~/repo/.docker/Dockerfile .
+            docker build -t announcementscraper .
+
+      - deploy:
+          name: Publish application to docker hub
+          command: |
+            if [[ $CIRCLE_BRANCH == 'master' ]]; then
+              echo "Pushing master branch to announcementscraper:latest"
+              docker login -e $DOCKER_HUB_EMAIL -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
+              docker tag announcementscraper:latest $DOCKER_HUB_USER_ID/announcementscraper:latest
+              docker push $DOCKER_HUB_USER_ID/announcementscraper:latest
+
+              exit 0
+            fi;
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build:
+          filters:
+            branches:
+              # only: dev
+              only: master
+            tags:
+              only: /^[0-9]+\.[0-9]+\.[0-9]+(?:-(?:rc|beta)\.[0-9]+)?$/
+      - hold:
+          type: approval
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: dev
+            tags:
+              only: /^[0-9]+\.[0-9]+\.[0-9]+(?:-(?:rc|beta)\.[0-9]+)?$/
