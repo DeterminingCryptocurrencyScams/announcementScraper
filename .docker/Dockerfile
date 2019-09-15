@@ -2,20 +2,20 @@ FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
-COPY scraper/AnnoucementScraper/AnnoucementScraper/*.csproj ./AnnoucementScraper/
-WORKDIR /app/AnnoucementScraper
+COPY scraper/AnnoucementScraper/AnnPostScraper/*.csproj ./AnnPostScraper/
+WORKDIR /app/AnnPostScraper
 RUN dotnet restore
 
 # copy and publish app and libraries
 WORKDIR /app/
-COPY scraper/AnnoucementScraper/AnnoucementScraper/. ./AnnoucementScraper/
-WORKDIR /app/AnnoucementScraper
+COPY scraper/AnnoucementScraper/AnnPostScraper/. ./AnnPostScraper/
+WORKDIR /app/AnnPostScraper
 RUN dotnet publish -c Release -o out
 
 
 FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS runtime
 WORKDIR /app
-COPY --from=build /app/AnnoucementScraper/out ./
+COPY --from=build /app/AnnPostScraper/out ./
 
 # Potential ENV variables/port
 # ENV DEPLOY_METHOD=docker \
@@ -23,4 +23,4 @@ COPY --from=build /app/AnnoucementScraper/out ./
 
 # EXPOSE 3000
 
-ENTRYPOINT ["dotnet", "AnnoucementScraper.dll"]
+ENTRYPOINT ["dotnet", "AnnPostScraper.dll"]
