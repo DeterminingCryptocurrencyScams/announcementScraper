@@ -14,10 +14,10 @@ WORKDIR /app/AnnPostScraper
 RUN dotnet publish -c Release -o out
 
 # copy and publish other app and libraries
-WORKDIR /app/
-COPY scraper/AnnoucementScraper/AnnoucementScraper/. ./AnnoucementScraper/
-WORKDIR /app/AnnoucementScraper
-RUN dotnet publish -c Release -o out
+# WORKDIR /app/
+# COPY scraper/AnnoucementScraper/AnnoucementScraper/. ./AnnoucementScraper/
+# WORKDIR /app/AnnoucementScraper
+# RUN dotnet publish -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS runtime
 WORKDIR /app
