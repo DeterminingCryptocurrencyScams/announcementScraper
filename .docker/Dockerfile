@@ -9,7 +9,7 @@ COPY scraper/AnnoucementScraper/AnnoucementScraper/*.csproj ./AnnoucementScraper
 RUN dotnet restore
 
 # copy and publish apps and libraries
-COPY scraper/. .
+COPY ./scraper/. .
 
 WORKDIR /app/AnnoucementScraper
 RUN dotnet build -c Release -o /app
