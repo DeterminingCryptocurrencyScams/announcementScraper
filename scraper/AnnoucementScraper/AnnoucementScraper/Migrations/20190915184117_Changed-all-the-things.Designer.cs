@@ -3,14 +3,16 @@ using System;
 using AnnoucementScraper.core.database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AnnoucementScraper.Migrations
 {
     [DbContext(typeof(MariaContext))]
-    partial class MariaContextModelSnapshot : ModelSnapshot
+    [Migration("20190915184117_Changed-all-the-things")]
+    partial class Changedallthethings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,11 +56,9 @@ namespace AnnoucementScraper.Migrations
 
                     b.Property<string>("Body");
 
-                    b.Property<bool>("IsScamHeaderPresent");
-
                     b.Property<int>("Merit");
 
-                    b.Property<string>("Position");
+                    b.Property<int>("Position");
 
                     b.Property<int>("PostNumber");
 

@@ -88,8 +88,8 @@ namespace AnnoucementScraper.core.crawler
             }
             var model = HandleRow(td);
             var context = new MariaContext();
-            await context.AnnTasks.AddAsync(model);
-            await context.SaveChangesAsync();
+           // await context.AnnTasks.AddAsync(model);
+           // await context.SaveChangesAsync();
             context.Dispose();
             return;
         }
