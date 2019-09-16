@@ -17,7 +17,7 @@ namespace AnnPostScraper.core.Extensions
         }
         public static string RemoveEmojis(this string str)
         {
-            var pattern = @"[^\u0000-\u22Fx]+";
+            var pattern = @"[^\u0000-\u007F]+";
             str = Regex.Replace(str, pattern, "");
             str = Regex.Replace(str, @"\p{Cs}", "");
             return str;
