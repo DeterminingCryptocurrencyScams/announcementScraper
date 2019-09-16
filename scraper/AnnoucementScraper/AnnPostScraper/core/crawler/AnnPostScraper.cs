@@ -63,7 +63,7 @@ namespace AnnPostScraper.core.crawler
             }
             var model = new PostModel(task);
             model.PostNumber = postNum;
-
+            model.TopicTitle = model.TopicTitle.RemoveEmojis();
             var td = node.Element("td");
             if (td == null)
             {
@@ -122,7 +122,7 @@ namespace AnnPostScraper.core.crawler
             model.PostedAt = date.InnerText;
 
             var div = body.Element("div");
-            model.Body = div.InnerText;
+            model.Body = div.InnerText.RemoveEmojis();
         }
         private PostModel GetDetails(HtmlNode details, PostModel model)
         {

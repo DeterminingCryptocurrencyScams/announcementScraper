@@ -15,5 +15,12 @@ namespace AnnPostScraper.core.Extensions
             str = str.Replace("  ", "");
             return str;
         }
+        public static string RemoveEmojis(this string str)
+        {
+            var pattern = @"[^\u0000-\u22Fx]+";
+            str = Regex.Replace(str, pattern, "");
+            str = Regex.Replace(str, @"\p{Cs}", "");
+            return str;
+        }
     }
 }
