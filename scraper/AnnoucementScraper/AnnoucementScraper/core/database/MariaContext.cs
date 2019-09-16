@@ -40,8 +40,8 @@ namespace AnnoucementScraper.core.database
             var randomInt = r.Next(0, total);
             var task = possibleTasks.AsEnumerable().ElementAt(randomInt);
             task.Status = AnnStatus.Working;
-            //this.Entry(task).State = EntityState.Modified;
-            //this.SaveChanges();
+            this.Entry(task).State = EntityState.Modified;
+            this.SaveChanges();
             return task;
         }
     }
