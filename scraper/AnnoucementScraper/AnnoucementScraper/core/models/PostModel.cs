@@ -10,7 +10,7 @@ namespace AnnoucementScraper.core.models
         public PostModel(AnnTaskModel annTask)
         {
             this.TopicAuthor = annTask.Author;
-            this.TopicTitle = annTask.PostTitle
+            this.TopicTitle = annTask.PostTitle;
             this.TopicUrl = annTask.PostUrl;
             this.TaskId = annTask.Id;
         }
