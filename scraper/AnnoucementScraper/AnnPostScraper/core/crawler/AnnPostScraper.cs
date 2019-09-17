@@ -47,6 +47,9 @@ namespace AnnPostScraper.core.crawler
             int pageNumber = 1;
             int postNumber = 0;
             bool isWorking = true;
+
+            int totalPages = GetRealTotalPages(doc.DocumentNode, task);
+
             var baseCol = doc.DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
             while (isWorking)
             {
@@ -57,8 +60,8 @@ namespace AnnPostScraper.core.crawler
                 ParsePost(row, doc, postNumber, task);
             }
 
-            var end = task.Replies / 20;
-            if (end <= pageNumber)
+
+            if (totalPages <= pageNumber)
             {
                     isWorking = false;
                     break;
@@ -112,6 +115,28 @@ namespace AnnPostScraper.core.crawler
             context.Posts.Add(model);
             context.SaveChanges();
             context.Dispose();
+        }
+
+        private int GetRealTotalPages(HtmlNode node, AnnTaskModel task)
+        {
+            var n = node.SelectSingleNode("/html[1]/body[1]/div[2]");
+
+            var table = n.Element("table");
+            if (table.ChildNodes.Any(f => f.Name == "tbody")) 
+            {
+                table = table.Element("tbody");
+            }
+            var t = table.Element("tr").Element("td");
+
+
+            var allAs = t.Elements("a");
+
+            if (allAs.Count() == 0)
+            {
+                return 0;
+            }
+
+            return int.Parse(allAs.ElementAt(allAs.Count() - 2).InnerText);
         }
         private void GetPost(HtmlNode details, PostModel model)
         {
