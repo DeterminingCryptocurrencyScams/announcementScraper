@@ -27,7 +27,12 @@ namespace AnnoucementScraper.core.database
         {
             modelBuilder.Entity<AnnTaskModel>().Property(f => f.Id).ValueGeneratedOnAdd();
         }
-
+        public async void UpdateTaskStatusToComplete(AnnTaskModel task)
+        {
+            task.Status = AnnStatus.Complete;
+            this.Entry(task).State = EntityState.Modified;
+            this.SaveChanges();
+        }
         public async Task<AnnTaskModel> NextTask()
         {
             var possibleTasks = this.AnnTasks.Where(f => f.Status == AnnStatus.Waiting);

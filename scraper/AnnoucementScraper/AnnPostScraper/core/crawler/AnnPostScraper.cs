@@ -16,10 +16,9 @@ namespace AnnPostScraper.core.crawler
     {
         public System.Timers.Timer Timer { get; set; } = new System.Timers.Timer();
         public bool isRunning { get; set; }
-        public int PageNumber { get; set; } = 0;
         public void Scrape()
         {
-            Timer.Interval = 1000;
+            Timer.Interval = 5000;
             Timer.Elapsed += Timer_Elapsed; ;
             Timer.Start();
             isRunning = true;
@@ -41,19 +40,37 @@ namespace AnnPostScraper.core.crawler
             }
             HtmlWeb web = new HtmlWeb();
 
-            Parse(web.Load(MakeUrl(task.PostUrl)), task);
-            PageNumber++;
+            Parse(web.Load(MakeUrl(task.PostUrl, 0)), task);
         }
         private void Parse(HtmlDocument doc, AnnTaskModel task)
         {
+            int pageNumber = 1;
             int postNumber = 0;
+            bool isWorking = true;
             var baseCol = doc.DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
+            while (isWorking)
+            {
             var tr = baseCol.Elements("tr");
             foreach (var row in tr)
             {
                 postNumber++;
                 ParsePost(row, doc, postNumber, task);
             }
+
+            var end = task.Replies / 20;
+            if (end <= pageNumber)
+            {
+                    isWorking = false;
+                    break;
+            }
+                pageNumber++;
+                HtmlWeb web = new HtmlWeb();
+                baseCol = web.Load(MakeUrl(task.PostUrl, pageNumber)).DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
+            }
+
+            var c = new MariaContext();
+            c.UpdateTaskStatusToComplete(task);
+
         }
         public void ParsePost(HtmlNode node, HtmlDocument doc, int postNum, AnnTaskModel task)
         {
@@ -188,13 +205,10 @@ namespace AnnPostScraper.core.crawler
             return model;
         }
 
-        private string MakeUrl(string url)
+        private string MakeUrl(string url, int pageNumber)
         {
-            return $"{url}.{CurrentPage()}";
-        }
-        private int CurrentPage()
-        {
-            return PageNumber * 20;
+            var usefulUrl = url.Remove(url.Length - 2);
+            return $"{usefulUrl}.{pageNumber  * 20}";
         }
         private bool IsPossibleScam(HtmlDocument doc)
         {
