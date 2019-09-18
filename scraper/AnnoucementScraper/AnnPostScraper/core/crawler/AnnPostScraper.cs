@@ -136,7 +136,12 @@ namespace AnnPostScraper.core.crawler
                 return 0;
             }
 
-            return int.Parse(allAs.ElementAt(allAs.Count() - 2).InnerText);
+            if (allAs.Last().InnerText.Contains("All"))
+            {
+                return int.Parse(allAs.ElementAt(allAs.Count() - 2).InnerText);
+            }
+
+            return int.Parse(allAs.ElementAt(allAs.Count() - 1).InnerText);
         }
         private void GetPost(HtmlNode details, PostModel model)
         {
