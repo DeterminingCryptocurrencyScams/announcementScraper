@@ -65,7 +65,7 @@ namespace AnnPostScraper.core.crawler
             foreach (var row in tr)
             {
                 postNumber++;
-                    Log.Information($"Scraping post number {postNumber} on page {pageNumber}");
+                    Log.Information($"task {task.Id} scraping post number {postNumber} on page {pageNumber}");
                 ParsePost(row, doc, postNumber, task);
             }
 
