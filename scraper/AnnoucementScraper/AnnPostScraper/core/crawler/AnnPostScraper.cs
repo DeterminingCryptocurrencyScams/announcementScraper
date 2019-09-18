@@ -3,6 +3,7 @@ using AnnoucementScraper.core.models;
 using AnnPostScraper.core.crawler.xpath;
 using AnnPostScraper.core.Extensions;
 using HtmlAgilityPack;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,12 @@ namespace AnnPostScraper.core.crawler
 {
     public class AnnPostScraper
     {
+        public AnnPostScraper()
+        {
+            var formatter = new Serilog.Formatting.Json.JsonFormatter();
+
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information).Enrich.FromLogContext().WriteTo.Console().CreateLogger();
+        }
         public System.Timers.Timer Timer { get; set; } = new System.Timers.Timer();
         public bool isRunning { get; set; }
         public void Scrape()
@@ -44,12 +51,13 @@ namespace AnnPostScraper.core.crawler
         }
         private void Parse(HtmlDocument doc, AnnTaskModel task)
         {
+            Log.Information($"Starting on task id:{task.Id}");
             int pageNumber = 1;
             int postNumber = 0;
             bool isWorking = true;
 
             int totalPages = GetRealTotalPages(doc.DocumentNode, task);
-
+            Log.Information($"task {task.Id} has {totalPages} pages, which is PROJECTED to be {totalPages * 20} total posts");
             var baseCol = doc.DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
             while (isWorking)
             {
@@ -57,12 +65,14 @@ namespace AnnPostScraper.core.crawler
             foreach (var row in tr)
             {
                 postNumber++;
+                    Log.Information($"Scraping post number {postNumber} on page {pageNumber}");
                 ParsePost(row, doc, postNumber, task);
             }
 
 
             if (totalPages <= pageNumber)
             {
+                    Log.Information($"Finished scraping {task.Id} with {postNumber} posts.");
                     isWorking = false;
                     break;
             }
