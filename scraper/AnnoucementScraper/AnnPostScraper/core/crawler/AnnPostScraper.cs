@@ -23,9 +23,11 @@ namespace AnnPostScraper.core.crawler
         }
         public System.Timers.Timer Timer { get; set; } = new System.Timers.Timer();
         public bool isRunning { get; set; }
+        public bool CanGo { get; set; } = true;
+        public int Inprogress { get; set; } = 0;
         public void Scrape()
         {
-            Timer.Interval = 5000;
+            Timer.Interval = 3400;
             Timer.Elapsed += Timer_Elapsed; ;
             Timer.Start();
             isRunning = true;
@@ -38,6 +40,16 @@ namespace AnnPostScraper.core.crawler
 
         private async void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+
+            if (CanGo == false)
+            {
+                CanGo = true;
+            }
+            if (Inprogress > 7)
+            {
+                return;
+            }
+            Inprogress++;
             var c = new MariaContext();
             var task = await c.NextTask();
             c.Dispose();
@@ -51,6 +63,7 @@ namespace AnnPostScraper.core.crawler
         }
         private void Parse(HtmlDocument doc, AnnTaskModel task)
         {
+            var random = new Random();
             Log.Information($"Starting on task id:{task.Id}");
             int pageNumber = 1;
             int postNumber = 0;
@@ -78,12 +91,32 @@ namespace AnnPostScraper.core.crawler
             }
                 pageNumber++;
                 HtmlWeb web = new HtmlWeb();
-                baseCol = web.Load(MakeUrl(task.PostUrl, pageNumber)).DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
+                while (CanGo == false)
+                {
+                    Thread.Sleep(random.Next(4000));
+                }
+                CanGo = false;
+                var page = web.Load(MakeUrl(task.PostUrl, pageNumber));
+                if (page.DocumentNode.InnerText.Contains("you are accessing the forum too quickly"))
+                {
+                    Log.Error("uh oh, we are rate limited!!! Stoping the timer for 1 minute");
+
+                    Timer.Stop();
+
+                    Thread.Sleep(60000);
+                    Log.Information("Resuming operations");
+                    Timer.Start();
+                }
+                 baseCol =  page.DocumentNode.SelectSingleNode(PostXpaths.BaseSelector);
+                if (baseCol == null)
+                {
+                    Log.Error($"BaseCol is nullllll");
+                }
             }
 
             var c = new MariaContext();
             c.UpdateTaskStatusToComplete(task);
-
+            Inprogress--;
         }
         public void ParsePost(HtmlNode node, HtmlDocument doc, int postNum, AnnTaskModel task)
         {
@@ -211,7 +244,7 @@ namespace AnnPostScraper.core.crawler
                 }
             }
 
-            merit.RemoveGarbage();
+           merit = merit.RemoveGarbage();
             if (merit.Contains(":"))
             {
             model.Merit = int.Parse(merit.Split(':')[1]);
